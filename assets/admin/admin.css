@@ -1174,6 +1174,37 @@ body.toplevel_page_wpcc #wpfooter {
 
 /* Footer ------------------------------------------------------------------ */
 
+/* Copy settings to another site (General) */
+.wpcc-transfer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px 32px;
+}
+
+.wpcc-transfer__part {
+    /* Column, with each box's button pinned to the bottom so they line up */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 18px;
+    border: 1px solid var(--wpcc-line);
+    border-radius: 8px;
+    background: #fcfcfc;
+}
+
+.wpcc-admin .wpcc-transfer__part h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+}
+
+.wpcc-transfer__part .description {
+    margin: 0 0 12px;
+}
+
+.wpcc-transfer__part > .button {
+    margin-top: auto;
+}
+
 /* Credit on the Updates tab */
 .wpcc-credit {
     margin: 24px 0 0;

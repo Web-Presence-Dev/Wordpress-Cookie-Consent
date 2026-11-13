@@ -26,6 +26,8 @@ class SettingsPage
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue']);
         add_action('admin_post_wpcc_check_updates', [$this, 'check_updates']);
+        add_action('admin_post_wpcc_export', [$this, 'export']);
+        add_action('admin_post_wpcc_import', [$this, 'import']);
         add_filter('plugin_action_links_' . WPCC_BASENAME, [$this, 'action_links']);
     }
 
@@ -36,6 +38,7 @@ class SettingsPage
             'appearance' => __('Appearance', 'wpcc'),
             'categories' => __('Categories & services', 'wpcc'),
             'scanner' => __('Scanner', 'wpcc'),
+            'tools' => __('Tools', 'wpcc'),
             'updates' => __('Updates', 'wpcc'),
         ];
     }
@@ -214,6 +217,7 @@ class SettingsPage
                     'appearance' => $this->tab_appearance(),
                     'categories' => $this->tab_categories(),
                     'scanner' => $this->tab_scanner(),
+                    'tools' => $this->tab_tools(),
                     'updates' => $this->tab_updates(),
                     default => $this->tab_general(),
                 };
@@ -377,6 +381,116 @@ class SettingsPage
         $this->form_close();
     }
 
+    private function tab_tools(): void
+    {
+        $this->card(__('Copy settings to another site', 'wpcc'), __('Export saves every Cookie Consent setting (appearance, colours, wording, categories, services and custom rules) to a file. Import it on another site to set it up the same way.', 'wpcc'));
+        ?>
+        <div class="wpcc-transfer">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="wpcc-transfer__part">
+                <h3><?php esc_html_e('Export', 'wpcc'); ?></h3>
+                <p class="description"><?php esc_html_e('Downloads a .json file. It contains no visitor data.', 'wpcc'); ?></p>
+                <input type="hidden" name="action" value="wpcc_export">
+                <?php wp_nonce_field('wpcc_export'); ?>
+                <?php submit_button(__('Export settings', 'wpcc'), 'secondary', 'submit', false); ?>
+            </form>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" class="wpcc-transfer__part">
+                <h3><?php esc_html_e('Import', 'wpcc'); ?></h3>
+                <p class="description"><?php esc_html_e('Replaces this site\'s settings with the ones in the file. The cookie policy page is matched by its address; visitors aren\'t asked for consent again.', 'wpcc'); ?></p>
+                <input type="hidden" name="action" value="wpcc_import">
+                <?php wp_nonce_field('wpcc_import'); ?>
+                <p><label class="screen-reader-text" for="wpcc-import-file"><?php esc_html_e('Settings file', 'wpcc'); ?></label>
+                <input type="file" id="wpcc-import-file" name="wpcc_import_file" accept=".json,application/json" required></p>
+                <?php submit_button(__('Import settings', 'wpcc'), 'secondary', 'submit', false); ?>
+            </form>
+        </div>
+        <?php
+        $this->card_end();
+    }
+
+    /**
+     * Download every setting as JSON (Tools > Copy settings to another site).
+     */
+    public function export(): void
+    {
+        check_admin_referer('wpcc_export');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Sorry, you are not allowed to do that.', 'wpcc'));
+        }
+
+        $settings = Settings::all();
+        $page = (int) $settings['policy_page'];
+
+        $file = [
+            'plugin' => 'webpresence-cookie-consent',
+            'plugin_version' => WPCC_VERSION,
+            'exported' => gmdate('c'),
+            'site' => home_url('/'),
+            // Page IDs differ between sites; import finds the page by its address
+            'policy_page_path' => $page ? (string) get_page_uri($page) : '',
+            'settings' => $settings,
+        ];
+
+        $host = sanitize_file_name((string) wp_parse_url(home_url(), PHP_URL_HOST));
+
+        nocache_headers();
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="cookie-consent-' . $host . '-' . gmdate('Y-m-d') . '.json"');
+        echo wp_json_encode($file, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
+     * Read an exported file and apply it through the normal sanitising.
+     */
+    public function import(): void
+    {
+        check_admin_referer('wpcc_import');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Sorry, you are not allowed to do that.', 'wpcc'));
+        }
+
+        $upload = $_FILES['wpcc_import_file'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+        $error = '';
+        $data = null;
+
+        if (!is_array($upload) || UPLOAD_ERR_OK !== ($upload['error'] ?? UPLOAD_ERR_NO_FILE) || !is_uploaded_file($upload['tmp_name'])) {
+            $error = __('No file was uploaded.', 'wpcc');
+        } elseif ($upload['size'] > 512 * KB_IN_BYTES) {
+            $error = __('That file is too big to be a Cookie Consent settings file.', 'wpcc');
+        } else {
+            $data = json_decode((string) file_get_contents($upload['tmp_name']), true);
+            if (!is_array($data) || ($data['plugin'] ?? '') !== 'webpresence-cookie-consent' || !is_array($data['settings'] ?? null)) {
+                $error = __('That isn\'t a Cookie Consent settings file. Use a file from "Export settings".', 'wpcc');
+            }
+        }
+
+        if ('' === $error) {
+            $result = Settings::import($data['settings'], (string) ($data['policy_page_path'] ?? ''));
+
+            add_settings_error(Settings::OPTION, 'imported', sprintf(
+                /* translators: %s: site address the settings came from */
+                __('Settings imported from %s.', 'wpcc'),
+                esc_html((string) ($data['site'] ?? __('another site', 'wpcc')))
+            ), 'success');
+
+            if ('' !== $result['policy_missing']) {
+                add_settings_error(Settings::OPTION, 'policy', sprintf(
+                    /* translators: %s: page address, e.g. /cookies/ */
+                    __('The cookie policy page (/%s/) wasn\'t found on this site. Choose it on the General tab, under Consent.', 'wpcc'),
+                    esc_html($result['policy_missing'])
+                ), 'warning');
+            }
+        } else {
+            add_settings_error(Settings::OPTION, 'import', $error, 'error');
+        }
+
+        set_transient('settings_errors', get_settings_errors(), 30);
+        wp_safe_redirect(add_query_arg('settings-updated', '1', self::url('tools')));
+        exit;
+    }
+
     /**
      * A page picker that searches pages as you type (the REST search
      * endpoint the block editor's link picker uses), see admin.js.
@@ -536,6 +650,9 @@ class SettingsPage
                         <button type="button" class="button-link wpcc-preview__enable-dark"><?php esc_html_e('Turn them on', 'wpcc'); ?></button>
                     </p>
                     <?php /* A front-end page with the theme's styles (src/Frontend/Preview.php); admin.js updates it live */ ?>
+                    <p class="wpcc-preview__hint wpcc-preview__cross" hidden>
+                        <?php esc_html_e('This site\'s front end is on a different address from the admin, so the preview shows your saved settings. Save to see changes.', 'wpcc'); ?>
+                    </p>
                     <iframe class="wpcc-preview-frame" src="<?php echo esc_url(\WebPresence\CookieConsent\Frontend\Preview::url()); ?>" title="<?php esc_attr_e('Preview of the cookie banner', 'wpcc'); ?>"></iframe>
                 </div>
             </aside>

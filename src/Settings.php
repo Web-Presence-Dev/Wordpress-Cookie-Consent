@@ -348,6 +348,36 @@ class Settings
         return $out;
     }
 
+    /**
+     * Apply settings from an export file. Each tab's values go through the
+     * same sanitising as the settings forms. The consent version isn't copied,
+     * so visitors to this site aren't asked again.
+     *
+     * @return array{policy_missing: string} Page address that wasn't found, if any.
+     */
+    public static function import(array $settings, string $policy_path): array
+    {
+        $policy_missing = '';
+        $page = 0;
+
+        if ('' !== $policy_path) {
+            $found = get_page_by_path($policy_path);
+            $page = $found ? (int) $found->ID : 0;
+            $policy_missing = $page ? '' : $policy_path;
+        }
+
+        $settings['policy_page'] = $page;
+        unset($settings['bump_version'], $settings['version']);
+
+        foreach (['general', 'appearance', 'categories'] as $tab) {
+            $clean = self::sanitize(array_merge($settings, ['_tab' => $tab]));
+            update_option(self::OPTION, $clean);
+            self::$cache = null;
+        }
+
+        return ['policy_missing' => $policy_missing];
+    }
+
     public static function sanitize_rules(mixed $rules): array
     {
         $clean = [];
