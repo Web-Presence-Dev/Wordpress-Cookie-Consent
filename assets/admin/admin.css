@@ -1,0 +1,1358 @@
+/*
+ * Web Presence Cookie Consent: settings page.
+ *
+ * Web Presence brand: navy #091B36, orange #E04F1F, cream #FFFBEF. Buttons use
+ * the darker orange #C43302 so white text on them passes AA (5:1), matching
+ * the webpresence theme's admin.scss.
+ */
+
+.wpcc-admin {
+    --wpcc-navy: #091b36;
+    --wpcc-navy-light: #0f2a52;
+    --wpcc-orange: #e04f1f;
+    --wpcc-orange-dark: #c43302;
+    --wpcc-cream: #fffbef;
+    --wpcc-beige: #eee9da;
+    --wpcc-line: #dcdcde;
+    max-width: none;
+    margin-right: 20px;
+}
+
+/* Web Presence cream behind this page, whatever the admin colour scheme sets */
+html:has(body.toplevel_page_wpcc) {
+    --wpcc-page: #fffbef;
+}
+
+html:has(body.toplevel_page_wpcc),
+body.toplevel_page_wpcc,
+body.toplevel_page_wpcc #wpwrap,
+body.toplevel_page_wpcc #wpcontent,
+body.toplevel_page_wpcc #wpbody,
+body.toplevel_page_wpcc #wpbody-content,
+body.toplevel_page_wpcc #wpfooter {
+    background: var(--wpcc-page) !important;
+}
+
+/* Space between the pinned header and the first card; scrolls away with the content */
+.wpcc-admin__body {
+    padding-top: 20px;
+}
+
+/* Notices (e.g. "Settings saved") sit below the pinned header; core's
+   .wrap div.notice margin is more specific, hence the extra classes */
+.wrap.wpcc-admin > div.notice,
+.wrap.wpcc-admin > div.updated,
+.wrap.wpcc-admin > div.error {
+    margin: 20px 0 0;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+/* Header + tabs stay pinned under the admin bar. The band is the admin
+   background colour, so content scrolling up disappears behind it rather than
+   showing in the gap above the header; its padding gives the same space above
+   and below the header on every tab. */
+.wpcc-admin__top {
+    position: sticky;
+    top: var(--wp-admin--admin-bar--height, 32px);
+    z-index: 20;
+    margin: -10px 0 0;
+    /* Grey above the header only (covers the gap under the admin bar);
+       below it, content slides straight behind the header */
+    padding: 20px 0 0;
+    /* Cream above the header and behind its rounded top corners (20px gap +
+       12px radius); transparent behind the rest, so scrolling content shows
+       through the rounded bottom corners */
+    background: linear-gradient(var(--wpcc-page), var(--wpcc-page)) top / 100% 32px no-repeat;
+}
+
+.wpcc-admin__top::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 12px;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 6px 12px -8px rgba(9, 27, 54, 0.35);
+    pointer-events: none;
+}
+
+.wpcc-admin__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    margin: 0 0 0;
+    padding: 20px 28px;
+    border-radius: 12px 12px 0 0;
+    background: var(--wpcc-navy);
+    color: var(--wpcc-cream);
+}
+
+.wpcc-admin__brand {
+    display: block;
+    color: var(--wpcc-cream);
+    line-height: 0;
+}
+
+.wpcc-admin__brand svg {
+    width: auto;
+    height: 30px;
+}
+
+.wpcc-admin__brand:focus {
+    outline: 2px solid var(--wpcc-orange);
+    outline-offset: 4px;
+    box-shadow: none;
+}
+
+.wpcc-admin__title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-left: 24px;
+    border-left: 1px solid rgba(255, 251, 239, 0.25);
+}
+
+.wpcc-admin__title h1 {
+    margin: 0;
+    padding: 0;
+    color: var(--wpcc-cream);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.wpcc-admin__version {
+    color: rgba(255, 251, 239, 0.7);
+    font-size: 12px;
+}
+
+/* Undo: light outline on the navy header */
+.wpcc-admin .wpcc-admin__header .wpcc-admin__undo.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 251, 239, 0.45);
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--wpcc-cream);
+    font-weight: 600;
+}
+
+.wpcc-admin .wpcc-admin__header .wpcc-admin__undo.button:hover:not([disabled]) {
+    border-color: var(--wpcc-cream);
+    background: rgba(255, 251, 239, 0.1);
+    color: #fff;
+}
+
+.wpcc-admin .wpcc-admin__header .wpcc-admin__undo.button:focus-visible {
+    outline: 2px solid var(--wpcc-orange);
+    outline-offset: 2px;
+}
+
+.wpcc-admin .wpcc-admin__header .wpcc-admin__undo.button[disabled] {
+    border-color: rgba(255, 251, 239, 0.2) !important;
+    background: transparent !important;
+    color: rgba(255, 251, 239, 0.4) !important;
+    cursor: default;
+}
+
+.wpcc-admin__save.button {
+    min-height: 36px;
+    padding: 0 18px;
+    font-weight: 600;
+}
+
+.wpcc-admin__save.button:focus {
+    box-shadow: 0 0 0 2px var(--wpcc-navy), 0 0 0 4px #fff;
+}
+
+.wpcc-admin__status {
+    margin-left: auto;
+    padding: 4px 12px 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.wpcc-admin__status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.wpcc-admin__status.is-on {
+    background: rgba(104, 222, 122, 0.15);
+    color: #8be59a;
+}
+
+.wpcc-admin__status.is-off {
+    background: rgba(255, 251, 239, 0.12);
+    color: var(--wpcc-cream);
+}
+
+/* Tabs -------------------------------------------------------------------- */
+
+.wpcc-admin__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0;
+    padding: 0 20px;
+    border-radius: 0 0 12px 12px;
+    background: var(--wpcc-navy-light);
+}
+
+.wpcc-admin__tab {
+    position: relative;
+    padding: 14px 12px;
+    color: rgba(255, 251, 239, 0.8);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.wpcc-admin__tab:hover,
+.wpcc-admin__tab:focus {
+    color: #fff;
+}
+
+.wpcc-admin__tab:focus {
+    outline: 2px solid var(--wpcc-orange);
+    outline-offset: -4px;
+    box-shadow: none;
+}
+
+.wpcc-admin__tab.is-active {
+    color: #fff;
+}
+
+.wpcc-admin__tab.is-active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    bottom: 0;
+    left: 12px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--wpcc-orange);
+}
+
+.wpcc-admin .wp-header-end {
+    display: none;
+}
+
+/* Cards and fields -------------------------------------------------------- */
+
+.wpcc-card {
+    margin: 0 0 20px;
+    padding: 24px 28px;
+    border: 1px solid var(--wpcc-line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+/* Same rhythm in every card on every tab: title, optional intro, then 16px
+   before whatever comes next (fields, tables, lists, buttons) */
+.wpcc-admin .wpcc-card__title {
+    margin: 0 0 16px;
+    padding: 0;
+    color: #1d2327;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.wpcc-admin .wpcc-card__title:has(+ .wpcc-card__intro) {
+    margin-bottom: 4px;
+}
+
+.wpcc-admin .wpcc-card__intro {
+    max-width: 70ch;
+    margin: 0 0 16px;
+    color: #50575e;
+}
+
+.wpcc-card > :last-child {
+    margin-bottom: 0;
+}
+
+.wpcc-card > .wpcc-table,
+.wpcc-card > .wpcc-meta,
+.wpcc-card > .wpcc-help-list,
+.wpcc-card > .wpcc-scan__controls,
+.wpcc-card > fieldset {
+    margin-top: 0;
+}
+
+.wpcc-card > .wpcc-category:first-of-type {
+    padding-top: 0;
+    border-top: 0;
+}
+
+/* Cookie policy page search */
+.wpcc-page-search {
+    position: relative;
+    max-width: 30em;
+}
+
+.wpcc-page-search__box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wpcc-page-search__box input {
+    flex: 1;
+}
+
+.wpcc-page-search__results {
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    left: 0;
+    max-height: 260px;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    list-style: none;
+    overflow-y: auto;
+}
+
+.wpcc-page-search__results[hidden] {
+    display: none;
+}
+
+.wpcc-page-search__results li {
+    margin: 0;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.wpcc-page-search__results li small {
+    display: block;
+    color: #646970;
+    word-break: break-all;
+}
+
+.wpcc-page-search__results li[aria-selected='true'],
+.wpcc-page-search__results li:hover {
+    background: #fff8f5;
+    color: var(--wpcc-orange-dark);
+}
+
+.wpcc-page-search__results .is-empty {
+    color: #646970;
+    cursor: default;
+}
+
+.wpcc-field {
+    margin: 0 0 18px;
+}
+
+.wpcc-field:last-child {
+    margin-bottom: 0;
+}
+
+.wpcc-field > label,
+.wpcc-field > legend {
+    display: block;
+    margin: 0 0 6px;
+    font-weight: 600;
+}
+
+.wpcc-field .description {
+    max-width: 70ch;
+}
+
+.wpcc-field--toggle,
+.wpcc-field--inline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.wpcc-field--toggle > label,
+.wpcc-field--inline > label {
+    margin: 0;
+}
+
+.wpcc-field--toggle .description,
+.wpcc-field--inline .description {
+    grid-column: 2;
+    margin-top: 4px;
+}
+
+.wpcc-admin [hidden] {
+    display: none !important;
+}
+
+.wpcc-field > label.wpcc-radio {
+    font-weight: 400;
+}
+
+.wpcc-radio {
+    display: flex;
+    gap: 10px;
+    max-width: 75ch;
+    margin: 0 0 10px;
+}
+
+.wpcc-radio input {
+    margin-top: 3px;
+}
+
+/* Brand switch. Core and the theme both style every checkbox (size, radius,
+   a checkmark in ::before), so every property is set here. */
+.wpcc-admin input.wpcc-toggle[type='checkbox'] {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    height: 24px;
+    min-height: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #c3c4c7;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    line-height: 0;
+    vertical-align: middle;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']::before,
+.wpcc-admin input.wpcc-toggle[type='checkbox']:checked::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    float: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:hover {
+    background-color: #a7aaad;
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:checked {
+    background: var(--wpcc-orange-dark);
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:checked:hover {
+    background: #a32a00;
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:checked::before {
+    transform: translateX(20px);
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:focus {
+    border: 0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    outline: none;
+}
+
+.wpcc-admin input.wpcc-toggle[type='checkbox']:focus-visible {
+    outline: 2px solid var(--wpcc-orange-dark);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wpcc-admin input.wpcc-toggle[type='checkbox'],
+    .wpcc-admin input.wpcc-toggle[type='checkbox']::before {
+        transition: none;
+    }
+}
+
+.wpcc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 20px;
+    margin-bottom: 18px;
+}
+
+.wpcc-grid .wpcc-field {
+    margin-bottom: 14px;
+}
+
+/* Font & shape: font, custom family (wider), text size, panel corners and
+   button corners on one row */
+.wpcc-grid--font {
+    grid-template-columns: minmax(150px, 1fr) minmax(220px, 2fr) repeat(3, minmax(120px, 1fr));
+    align-items: start;
+    margin-bottom: 0;
+}
+
+@media (max-width: 1280px) {
+    .wpcc-grid--font {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+.wpcc-grid--font .description {
+    margin-top: 4px;
+}
+
+.wpcc-grid select,
+.wpcc-grid input.wpcc-full,
+.wpcc-grid input.small-text {
+    width: 100%;
+    max-width: 100%;
+}
+
+.wpcc-grid input.small-text {
+    max-width: 120px;
+}
+
+.wpcc-grid input.regular-text {
+    width: 100%;
+}
+
+.wpcc-category {
+    padding: 18px 0;
+    border-top: 1px solid var(--wpcc-line);
+}
+
+.wpcc-category .wpcc-grid {
+    margin: 14px 0 0;
+}
+
+.wpcc-help-list {
+    margin: 0;
+}
+
+.wpcc-help-list code {
+    white-space: nowrap;
+}
+
+/* Primary buttons in brand orange */
+.wpcc-admin .button-primary,
+.wpcc-admin .wpcc-button-primary {
+    border-color: var(--wpcc-orange-dark);
+    background: var(--wpcc-orange-dark);
+    color: #fff;
+}
+
+.wpcc-admin .button-primary:hover,
+.wpcc-admin .button-primary:focus,
+.wpcc-admin .wpcc-button-primary:hover {
+    border-color: #a32a00;
+    background: #a32a00;
+    color: #fff;
+}
+
+.wpcc-admin .button-primary:focus {
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wpcc-orange-dark);
+}
+
+.wpcc-admin .button-primary[disabled] {
+    border-color: #dcdcde !important;
+    background: #f6f7f7 !important;
+    color: #a7aaad !important;
+}
+
+.wpcc-pill {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 99px;
+    background: var(--wpcc-beige);
+    color: var(--wpcc-navy);
+    font-size: 11px;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.wpcc-table th[scope='row'] {
+    font-weight: 600;
+}
+
+.wpcc-table td,
+.wpcc-table th {
+    vertical-align: middle;
+}
+
+.wpcc-table code {
+    background: none;
+    font-size: 12px;
+}
+
+.wpcc-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 24px;
+    margin: 0 0 20px;
+}
+
+.wpcc-meta dt {
+    font-weight: 600;
+}
+
+.wpcc-meta dd {
+    margin: 0;
+}
+
+.wpcc-admin > .notice,
+.wpcc-admin > .updated,
+.wpcc-admin > .error {
+    margin: 0 0 20px;
+}
+
+.wpcc-admin .notice.inline {
+    margin: 0 0 16px;
+}
+
+.wpcc-checked {
+    margin-left: 10px;
+    color: #007017;
+}
+
+.wpcc-release-notes {
+    max-width: 75ch;
+}
+
+/* Appearance: layout + preview -------------------------------------------- */
+
+.wpcc-split {
+    display: grid;
+    gap: 20px;
+}
+
+@media (min-width: 1100px) {
+    .wpcc-split {
+        grid-template-columns: minmax(0, 1fr) clamp(380px, 32%, 560px);
+        /* The preview column runs the full height so its panel stays pinned */
+        align-items: stretch;
+    }
+}
+
+/* Floats beside the form for its whole length; the preview scrolls inside */
+.wpcc-preview-sticky {
+    position: sticky;
+    /* --wpcc-pin (admin.js): the header's bottom edge + the 20px gap, i.e.
+       exactly where the panel starts, so it never creeps when it pins */
+    top: var(--wpcc-pin, 198px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    /* Short enough to fit above the page footer too, so it isn't pushed up
+       at the bottom of the page */
+    max-height: calc(100vh - var(--wpcc-pin, 198px) - var(--wpcc-pin-space, 120px));
+    padding: 20px;
+    border: 1px solid var(--wpcc-line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.wpcc-preview__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.wpcc-preview__head h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.wpcc-preview__modes .button.is-active {
+    border-color: var(--wpcc-navy);
+    background: var(--wpcc-navy);
+    color: #fff;
+}
+
+.wpcc-preview {
+    display: grid;
+    gap: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px;
+    border-radius: 8px;
+    background:
+        repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0 10px, transparent 10px 20px),
+        #f6f7f7;
+    overflow: auto;
+}
+
+/* Dark: the preview's backdrop becomes a dark page */
+.wpcc-preview[data-mode='dark'] {
+    background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 10px, transparent 10px 20px),
+        #1d2327;
+}
+
+.wpcc-preview__hint {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border-left: 4px solid #dba617;
+    background: #fcf9e8;
+    font-size: 13px;
+}
+
+.wpcc-preview__hint[hidden] {
+    display: none;
+}
+
+.wpcc-preview .wpcc-root {
+    display: grid;
+    gap: 16px;
+}
+
+.wpcc-preview .wpcc-banner,
+.wpcc-preview .wpcc-banner--modal,
+.wpcc-preview .wpcc-banner--bar {
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+.wpcc-preview .wpcc-banner--bar {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    border-radius: 0;
+}
+
+.wpcc-preview .wpcc-overlay {
+    display: none;
+}
+
+/* Floating button shown in place, under the dialog */
+.wpcc-preview .wpcc-floating {
+    position: relative;
+    inset: auto;
+    margin: 0;
+}
+
+.wpcc-preview__label {
+    margin: 0 0 -8px;
+    color: #50575e;
+    font-size: 12px;
+}
+
+.wpcc-preview[data-mode='dark'] .wpcc-preview__label {
+    color: #c3c4c7;
+}
+
+.wpcc-preview .wpcc-dialog {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: auto;
+    margin: 0;
+    opacity: 1;
+    transform: none;
+}
+
+/* Nothing in the preview scrolls on its own, so the wheel always scrolls the
+   preview (the front end's overscroll-behavior: contain would trap it) */
+.wpcc-preview .wpcc-dialog__inner,
+.wpcc-preview .wpcc-banner {
+    max-height: none;
+    overflow: visible;
+    overscroll-behavior: auto;
+}
+
+.wpcc-preview .wpcc-switch {
+    cursor: pointer;
+}
+
+/* WordPress admin styles every checkbox; put the front-end switch back */
+.wpcc-preview input.wpcc-switch[type='checkbox'] {
+    width: 44px;
+    min-width: 44px;
+    height: 24px;
+    margin: 0;
+    border: 2px solid var(--wpcc-ink, #1d2327);
+    border-radius: 24px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.wpcc-preview input.wpcc-switch[type='checkbox']::before,
+.wpcc-preview input.wpcc-switch[type='checkbox']:checked::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border-radius: 50%;
+    background: var(--wpcc-ink, #1d2327);
+}
+
+.wpcc-preview input.wpcc-switch[type='checkbox']:checked {
+    border-color: var(--wpcc-switch-on, #1d2327);
+    background: var(--wpcc-switch-on, #1d2327);
+}
+
+.wpcc-preview input.wpcc-switch[type='checkbox']:checked::before {
+    background: var(--wpcc-surface, #fff);
+    transform: translateX(20px);
+}
+
+.wpcc-preview .wpcc-dialog__close {
+    pointer-events: none;
+}
+
+.wpcc-preview .wpcc-dialog__title {
+    border: 0;
+    padding: 0;
+}
+
+/* Position picker */
+.wpcc-positions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.wpcc-position {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 2px solid var(--wpcc-line);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.wpcc-position:has(input:checked) {
+    border-color: var(--wpcc-orange-dark);
+    background: #fff8f5;
+}
+
+.wpcc-position:has(input:focus-visible) {
+    outline: 2px solid var(--wpcc-orange-dark);
+    outline-offset: 2px;
+}
+
+.wpcc-position input {
+    position: absolute;
+    opacity: 0;
+}
+
+.wpcc-position__shape {
+    position: relative;
+    display: block;
+    height: 64px;
+    border-radius: 6px;
+    background: var(--wpcc-beige);
+}
+
+.wpcc-position__shape i {
+    position: absolute;
+    display: block;
+    border-radius: 3px;
+    background: var(--wpcc-navy);
+}
+
+.wpcc-position--card-left i { left: 6px; bottom: 6px; width: 45%; height: 22px; }
+.wpcc-position--card-right i { right: 6px; bottom: 6px; width: 45%; height: 22px; }
+.wpcc-position--bar i { left: 0; right: 0; bottom: 0; height: 14px; border-radius: 0 0 6px 6px; }
+.wpcc-position--modal .wpcc-position__shape { background: #b9b19a; }
+.wpcc-position--modal i { top: 50%; left: 50%; width: 50%; height: 30px; transform: translate(-50%, -50%); }
+
+/* Colours: one row per part of the banner -------------------------------- */
+
+.wpcc-color-group {
+    display: grid;
+    grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+    gap: 16px 28px;
+    align-items: start;
+    margin: 0;
+    padding: 18px 12px;
+    border-top: 1px solid var(--wpcc-line);
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.wpcc-color-group:first-of-type {
+    border-top: 0;
+}
+
+.wpcc-color-group:hover,
+.wpcc-color-group:focus-within {
+    background: #fff8f5;
+}
+
+.wpcc-color-group__head {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.wpcc-admin .wpcc-color-group__title {
+    margin: 0 0 2px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wpcc-color-group__intro {
+    margin: 0;
+    color: #646970;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Little diagrams of the part each group changes */
+.wpcc-color-group__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 52px;
+    height: 40px;
+    border-radius: 6px;
+    background: var(--wpcc-beige);
+}
+
+.wpcc-color-group__icon i {
+    position: absolute;
+    display: block;
+    border-radius: 3px;
+    background: var(--wpcc-navy);
+}
+
+.wpcc-color-group__icon--banner i:first-child { left: 5px; right: 5px; bottom: 5px; height: 14px; }
+.wpcc-color-group__icon--banner i:last-child { display: none; }
+
+.wpcc-color-group__icon--buttons i { top: 15px; width: 18px; height: 10px; border-radius: 5px; }
+.wpcc-color-group__icon--buttons i:first-child { left: 6px; background: var(--wpcc-orange-dark); }
+.wpcc-color-group__icon--buttons i:last-child { right: 6px; background: transparent; box-shadow: inset 0 0 0 2px var(--wpcc-navy); }
+
+.wpcc-color-group__icon--dialog { background: #b9b19a; }
+.wpcc-color-group__icon--dialog i:first-child { top: 6px; left: 12px; right: 12px; bottom: 6px; background: #fff; }
+.wpcc-color-group__icon--dialog i:last-child { top: 12px; right: 16px; width: 8px; height: 5px; border-radius: 3px; background: var(--wpcc-orange-dark); }
+
+.wpcc-color-group__icon--floating i:first-child { left: 5px; bottom: 5px; width: 14px; height: 14px; border-radius: 50%; }
+.wpcc-color-group__icon--floating i:last-child { display: none; }
+
+.wpcc-color-group .wpcc-colors {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px 18px;
+    margin: 0;
+}
+
+.wpcc-dark-toggle {
+    margin: 20px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--wpcc-line);
+}
+
+.wpcc-dark-colors {
+    margin-top: 14px;
+    padding: 8px 8px 4px;
+    border-radius: 10px;
+    background: #f6f7f7;
+}
+
+.wpcc-dark-colors__title {
+    margin: 6px 12px 4px;
+    font-weight: 600;
+}
+
+.wpcc-dark-colors .wpcc-color-group:hover,
+.wpcc-dark-colors .wpcc-color-group:focus-within {
+    background: #fff;
+}
+
+@media (max-width: 960px) {
+    .wpcc-color-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Theme buttons in the preview: the theme's CSS isn't loaded here, so show
+   a plain stand-in rather than browser-default buttons */
+.wpcc-preview .wpcc-btn {
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 1px dashed currentColor;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.wpcc-preview .wpcc-btn svg {
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+}
+
+/* The part being edited, outlined in the preview */
+.wpcc-preview .is-wpcc-highlight {
+    outline: 3px dashed var(--wpcc-orange);
+    outline-offset: 4px;
+    transition: outline-color 0.15s ease;
+}
+
+/* The open picker floats over the page instead of pushing it down */
+.wpcc-color .wp-picker-container {
+    position: relative;
+}
+
+.wpcc-color .wp-picker-container.wp-picker-active {
+    z-index: 30;
+}
+
+.wpcc-color .wp-picker-input-wrap,
+.wpcc-color .wp-picker-holder {
+    position: absolute;
+    left: 0;
+    width: 257px;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.wpcc-color .wp-picker-input-wrap {
+    top: 38px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+    padding: 10px 10px 8px;
+    border: 1px solid #c3c4c7;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.wpcc-color .wp-picker-input-wrap.hidden {
+    display: none;
+}
+
+.wpcc-color .wp-picker-input-wrap label {
+    flex: 1;
+}
+
+.wpcc-color .wp-picker-holder {
+    top: 86px;
+    z-index: 1;
+    padding: 0 0 4px;
+    border: 1px solid #c3c4c7;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 14px 28px rgba(9, 27, 54, 0.18);
+}
+
+.wpcc-color .wp-picker-holder:empty,
+.wpcc-color .wp-picker-container:not(.wp-picker-active) .wp-picker-holder {
+    display: none;
+}
+
+.wpcc-color .iris-picker {
+    border: 0;
+    box-shadow: none;
+}
+
+/* A picker that would run off the card opens leftwards (admin.js) */
+.wpcc-color.is-flipped .wp-picker-input-wrap,
+.wpcc-color.is-flipped .wp-picker-holder {
+    right: 0;
+    left: auto;
+}
+
+.wpcc-color input.wpcc-rgba {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.wpcc-color > label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.wpcc-color .wp-picker-container {
+    display: block;
+}
+
+/* Some themes restyle every admin .button (pill shape, brand border), which
+   breaks the picker's swatch + label button; restore core's look here */
+.wpcc-admin .wp-picker-container .button.wp-color-result {
+    min-height: 30px;
+    height: 32px;
+    margin: 0 6px 6px 0;
+    padding: 0 0 0 30px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: none;
+    overflow: hidden;
+    vertical-align: top;
+}
+
+.wpcc-admin .wp-picker-container .wp-color-result-text {
+    display: block;
+    height: 30px;
+    padding: 0 10px;
+    border-left: 1px solid #c3c4c7;
+    border-radius: 0 3px 3px 0;
+    background: #f6f7f7;
+    color: #50575e;
+    font-size: 12px;
+    line-height: 30px;
+}
+
+.wpcc-admin .wp-picker-container .button.wp-color-result:hover .wp-color-result-text,
+.wpcc-admin .wp-picker-container .button.wp-color-result:focus .wp-color-result-text {
+    background: #f0f0f1;
+    color: #1d2327;
+}
+
+.wpcc-admin .wp-picker-container .button.wp-color-result:focus {
+    border-color: var(--wpcc-orange-dark);
+    box-shadow: 0 0 0 1px var(--wpcc-orange-dark);
+}
+
+.wpcc-admin .wp-picker-container .button.wp-picker-clear,
+.wpcc-admin .wp-picker-container .button.wp-picker-default {
+    min-height: 30px;
+    margin-left: 6px;
+    padding: 0 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 2.3;
+}
+
+.wpcc-admin .wp-picker-container input[type='text'].wp-color-picker {
+    width: 5.5rem;
+    min-height: 30px;
+    margin: 0;
+    padding: 0 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* Scanner ----------------------------------------------------------------- */
+
+.wpcc-scan__controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.wpcc-scan__status {
+    color: #50575e;
+}
+
+/* Scan frames need a real viewport: with display:none a page sees 0x0, and
+   scripts that measure the screen (marquees, sliders) can loop forever and
+   freeze this tab, which shares their thread. Off-screen and invisible instead. */
+.wpcc-scan__frames {
+    position: fixed;
+    top: 0;
+    left: -20000px;
+    width: 1280px;
+    height: 800px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wpcc-scan__frames iframe {
+    display: block;
+    width: 1280px;
+    height: 800px;
+    border: 0;
+}
+
+.wpcc-scan__results {
+    margin-top: 20px;
+}
+
+.wpcc-scan__summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.wpcc-status {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wpcc-status--blocked { background: #e6f4ea; color: #0a5c1f; }
+.wpcc-status--allowed { background: #f0f0f1; color: #3c434a; }
+.wpcc-status--necessary { background: #eef3fb; color: #1a4d99; }
+.wpcc-status--essential { background: #eef3fb; color: #1a4d99; }
+.wpcc-status--unknown { background: #fcebe5; color: #8a2600; }
+
+.wpcc-scan__pages {
+    color: #50575e;
+    font-size: 12px;
+}
+
+.wpcc-scan__assign {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Unsaved changes modal ---------------------------------------------------- */
+
+.wpcc-leave {
+    width: min(460px, calc(100% - 32px));
+    padding: 0;
+    border: 0;
+    border-top: 4px solid var(--wpcc-orange);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(9, 27, 54, 0.3);
+}
+
+.wpcc-leave::backdrop {
+    background: rgba(9, 27, 54, 0.55);
+}
+
+.wpcc-leave h2 {
+    margin: 0;
+    padding: 24px 28px 0;
+    color: var(--wpcc-navy);
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.wpcc-leave p {
+    margin: 8px 0 0;
+    padding: 0 28px;
+    color: #3c434a;
+    font-size: 14px;
+}
+
+.wpcc-leave__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 16px 28px;
+    border-radius: 0 0 12px 12px;
+    background: #f6f7f7;
+}
+
+/* Set every state: the theme restyles admin buttons (orange pills) */
+.wpcc-admin .wpcc-leave__actions .button {
+    min-height: 36px;
+    margin: 0;
+    padding: 0 16px;
+    border: 1px solid var(--wpcc-navy);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: none;
+    color: var(--wpcc-navy);
+    font-weight: 600;
+    line-height: 34px;
+}
+
+.wpcc-admin .wpcc-leave__actions .button:hover {
+    background: #f0f0f1;
+    color: var(--wpcc-navy);
+}
+
+.wpcc-admin .wpcc-leave__actions .button.button-primary,
+.wpcc-admin .wpcc-leave__actions .button.button-primary:focus {
+    border-color: var(--wpcc-orange-dark);
+    background: var(--wpcc-orange-dark);
+    color: #fff;
+}
+
+.wpcc-admin .wpcc-leave__actions .button.button-primary:hover {
+    border-color: #a32a00;
+    background: #a32a00;
+    color: #fff;
+}
+
+.wpcc-admin .wpcc-leave__actions .button:focus-visible {
+    outline: 2px solid var(--wpcc-orange-dark);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.wpcc-leave__actions .button-link {
+    margin-left: auto;
+    color: #50575e;
+}
+
+/* Footer ------------------------------------------------------------------ */
+
+/* Credit on the Updates tab */
+.wpcc-credit {
+    margin: 24px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--wpcc-line);
+    color: #646970;
+    font-size: 12px;
+}
+
+.wpcc-credit a {
+    color: var(--wpcc-orange-dark);
+}
+
+.wpcc-admin__body {
+    padding-bottom: 24px;
+}
+
+@media (max-width: 782px) {
+    .wpcc-admin {
+        margin-right: 10px;
+    }
+
+    .wpcc-admin__title {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .wpcc-admin__status {
+        margin-left: 0;
+    }
+
+    .wpcc-admin__top {
+        position: static;
+    }
+
+    .wpcc-card {
+        padding: 18px;
+    }
+}

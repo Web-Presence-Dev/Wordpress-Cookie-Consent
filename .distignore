@@ -1,0 +1,16 @@
+# Left out of the release zip (see .github/workflows/release.yml)
+.git
+.github
+.gitignore
+.distignore
+.vscode
+.idea
+.claude
+node_modules
+vendor
+tests
+bin
+composer.lock
+phpcs.xml
+*.log
+.DS_Store

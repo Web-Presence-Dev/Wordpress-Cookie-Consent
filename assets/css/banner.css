@@ -1,0 +1,539 @@
+/*
+ * Web Presence Cookie Consent: banner, preferences dialog, embed placeholders.
+ *
+ * Colours, font, size and radius come from --wpcc-* custom properties printed
+ * from the Appearance settings (src/Frontend/HeadScript.php::css_vars), so
+ * this file never needs editing per site. The fallbacks below are the defaults.
+ */
+
+.wpcc-root,
+.wpcc-placeholder,
+.wpcc-button,
+.wpcc-link,
+.wpcc-floating {
+    --wpcc-gap: 12px;
+    box-sizing: border-box;
+}
+
+.wpcc-root *,
+.wpcc-root *::before,
+.wpcc-root *::after,
+.wpcc-placeholder * {
+    box-sizing: border-box;
+}
+
+/*
+ * Surface (background), ink (text) and anchor (links) for each part. The
+ * banner and placeholders use the main colours; the preferences pop-up has
+ * its own, which fall back to the banner's when left empty.
+ */
+.wpcc-root,
+.wpcc-placeholder {
+    --wpcc-surface: var(--wpcc-bg, #fff);
+    --wpcc-ink: var(--wpcc-text, #1d2327);
+    --wpcc-anchor: var(--wpcc-link, currentColor);
+}
+
+.wpcc-dialog {
+    --wpcc-surface: var(--wpcc-dialog-bg, var(--wpcc-bg, #fff));
+    --wpcc-ink: var(--wpcc-dialog-text, var(--wpcc-text, #1d2327));
+    --wpcc-anchor: var(--wpcc-dialog-link, var(--wpcc-link, currentColor));
+}
+
+.wpcc-banner,
+.wpcc-dialog,
+.wpcc-placeholder,
+.wpcc-floating {
+    font-family: var(--wpcc-font, inherit);
+    font-size: var(--wpcc-font-size, 15px);
+    line-height: 1.5;
+    color: var(--wpcc-ink, #1d2327);
+}
+
+.wpcc-banner a,
+.wpcc-dialog a {
+    color: var(--wpcc-anchor, currentColor);
+    font-size: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.wpcc-root :focus-visible,
+.wpcc-placeholder :focus-visible,
+.wpcc-open:focus-visible {
+    outline: 2px solid var(--wpcc-primary-bg, #1d2327);
+    outline-offset: 2px;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+
+.wpcc-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 18px;
+    border: 2px solid var(--wpcc-primary-bg, #1d2327);
+    border-radius: var(--wpcc-button-radius, 8px);
+    background: var(--wpcc-primary-bg, #1d2327);
+    color: var(--wpcc-primary-text, #fff);
+    font: inherit;
+    font-family: var(--wpcc-font, inherit);
+    font-size: var(--wpcc-font-size, 15px);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    /* Hover colours fade in and out (off with reduced motion, below) */
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        filter 0.2s ease,
+        transform 0.15s ease;
+}
+
+.wpcc-button:hover {
+    filter: brightness(1.12);
+}
+
+/* Main buttons: hover colours from settings. Without them, the brighten
+   effect above; with them, --wpcc-primary-hover-filter switches it off */
+.wpcc-button--primary:hover,
+.wpcc-button--primary:focus-visible {
+    border-color: var(--wpcc-primary-hover-bg, var(--wpcc-primary-bg, #1d2327));
+    background: var(--wpcc-primary-hover-bg, var(--wpcc-primary-bg, #1d2327));
+    color: var(--wpcc-primary-hover-text, var(--wpcc-primary-text, #fff));
+    filter: var(--wpcc-primary-hover-filter, brightness(1.12));
+}
+
+.wpcc-button:active {
+    transform: translateY(1px);
+}
+
+/* Theme buttons ("Use my theme's buttons"): the theme styles them; this only
+   keeps them from stretching in the button rows */
+.wpcc-btn {
+    flex: 0 0 auto;
+}
+
+.wpcc-button--secondary {
+    border-color: var(--wpcc-secondary-border, #1d2327);
+    background: var(--wpcc-secondary-bg, #fff);
+    color: var(--wpcc-secondary-text, #1d2327);
+}
+
+.wpcc-link {
+    margin: 0;
+    padding: 10px 4px;
+    border: 0;
+    background: none;
+    color: var(--wpcc-anchor, inherit);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+}
+
+/* Banner ----------------------------------------------------------------- */
+
+.wpcc-banner {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    left: 16px;
+    right: 16px;
+    z-index: 2147483000;
+    display: grid;
+    gap: 16px;
+    max-width: 440px;
+    max-height: calc(100dvh - 32px);
+    margin: 0;
+    padding: 20px;
+    border: 1px solid color-mix(in srgb, var(--wpcc-ink, #1d2327) 12%, transparent);
+    border-radius: var(--wpcc-radius, 12px);
+    background: var(--wpcc-surface, #fff);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(calc(100% + 40px));
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease-out;
+}
+
+.wpcc-banner[hidden] {
+    display: none;
+}
+
+.wpcc-banner.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+.wpcc-banner.is-leaving {
+    transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+}
+
+.wpcc-banner--card-right {
+    left: auto;
+}
+
+.wpcc-banner--bar {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: none;
+    border-width: 1px 0 0;
+    border-radius: 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.wpcc-banner--modal {
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    width: min(520px, calc(100% - 32px));
+    max-width: none;
+    transform: translate(-50%, -40%);
+}
+
+.wpcc-banner--modal.is-visible {
+    transform: translate(-50%, -50%);
+}
+
+@media (min-width: 768px) {
+    .wpcc-banner {
+        padding: 24px;
+    }
+
+    .wpcc-banner--card-left {
+        right: auto;
+    }
+
+    .wpcc-banner--bar {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 16px 32px;
+        padding: 20px 32px;
+    }
+}
+
+.wpcc-banner__text {
+    margin: 0;
+}
+
+.wpcc-banner__actions,
+.wpcc-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px var(--wpcc-gap);
+}
+
+.wpcc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147482999;
+    background: var(--wpcc-backdrop, rgba(0, 0, 0, 0.4));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.wpcc-overlay.is-visible {
+    opacity: 1;
+}
+
+.wpcc-overlay[hidden] {
+    display: none;
+}
+
+/* Preferences dialog ----------------------------------------------------- */
+
+.wpcc-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(560px, calc(100% - 32px));
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--wpcc-radius, 12px);
+    background: var(--wpcc-surface, #fff);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    overflow: visible;
+}
+
+.wpcc-dialog:not([open]) {
+    display: none;
+}
+
+.wpcc-dialog::backdrop {
+    background: var(--wpcc-backdrop, rgba(0, 0, 0, 0.4));
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.wpcc-dialog.wpcc-animated {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease-out;
+}
+
+.wpcc-dialog.wpcc-animated::backdrop {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.wpcc-dialog.wpcc-animated.is-open {
+    opacity: 1;
+    transform: none;
+}
+
+.wpcc-dialog.wpcc-animated.is-open::backdrop {
+    opacity: 1;
+}
+
+.wpcc-dialog.wpcc-animated.is-closing {
+    transform: translateY(16px) scale(0.98);
+    transition: transform 0.35s ease-in, opacity 0.35s ease-in;
+}
+
+.wpcc-dialog__inner {
+    max-height: calc(100dvh - 32px);
+    margin: 0;
+    padding: 44px 20px 28px;
+    border-radius: inherit;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+@media (min-width: 768px) {
+    .wpcc-dialog__inner {
+        padding: 48px 36px 36px;
+    }
+}
+
+.wpcc-dialog__title {
+    margin: 0 0 12px;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.wpcc-dialog__intro {
+    margin: 0 0 20px;
+}
+
+.wpcc-dialog__list {
+    margin: 0 0 24px;
+    padding: 0;
+    list-style: none;
+}
+
+.wpcc-dialog__item {
+    margin: 0;
+    padding: 16px 0;
+    border-top: 1px solid color-mix(in srgb, var(--wpcc-ink, #1d2327) 18%, transparent);
+}
+
+.wpcc-dialog__item::before {
+    content: none;
+}
+
+.wpcc-dialog__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.wpcc-dialog__label {
+    margin: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1.05em;
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+}
+
+h3.wpcc-dialog__label {
+    cursor: default;
+}
+
+.wpcc-dialog__always {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.wpcc-dialog__description {
+    margin: 6px 0 0;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+
+.wpcc-dialog__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+.wpcc-dialog__close:hover {
+    background: color-mix(in srgb, var(--wpcc-ink, #1d2327) 10%, transparent);
+    transform: rotate(90deg);
+}
+
+/* The knob position and filled track both show "on", not colour alone */
+.wpcc-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 24px;
+    margin: 0;
+    border: 2px solid var(--wpcc-ink, #1d2327);
+    border-radius: 24px;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+.wpcc-switch::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--wpcc-ink, #1d2327);
+    transition: transform 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.wpcc-switch:checked {
+    border-color: var(--wpcc-switch-on, #1d2327);
+    background: var(--wpcc-switch-on, #1d2327);
+}
+
+.wpcc-switch:checked::before {
+    background: var(--wpcc-surface, #fff);
+    transform: translateX(20px);
+}
+
+/* Only while the real dialog is open as a modal (not the settings preview) */
+html:has(dialog.wpcc-dialog:modal) {
+    overflow: hidden;
+}
+
+/* Floating "Cookie settings" button -------------------------------------- */
+
+.wpcc-floating {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    left: 16px;
+    z-index: 2147482998;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--wpcc-floating-icon, var(--wpcc-text, #1d2327)) 15%, transparent);
+    border-radius: 50%;
+    background: var(--wpcc-floating-bg, var(--wpcc-bg, #fff));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    color: var(--wpcc-floating-icon, var(--wpcc-text, #1d2327));
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.wpcc-floating:hover {
+    transform: scale(1.06);
+}
+
+.wpcc-has-banner .wpcc-floating {
+    display: none;
+}
+
+/* Blocked embeds --------------------------------------------------------- */
+
+iframe.wpcc-blocked {
+    display: none !important;
+}
+
+.wpcc-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 200px;
+    aspect-ratio: 16 / 9;
+    margin: 0 0 1em;
+    padding: 24px;
+    border: 1px solid color-mix(in srgb, var(--wpcc-ink, #1d2327) 15%, transparent);
+    border-radius: var(--wpcc-radius, 12px);
+    background: color-mix(in srgb, var(--wpcc-surface, #fff) 92%, var(--wpcc-ink, #1d2327));
+    text-align: center;
+}
+
+.wpcc-placeholder__text {
+    max-width: 40ch;
+    margin: 0;
+}
+
+/* Reduced motion: fade in place --------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .wpcc-banner,
+    .wpcc-banner--modal,
+    .wpcc-banner--modal.is-visible,
+    .wpcc-dialog.wpcc-animated,
+    .wpcc-dialog.wpcc-animated.is-closing {
+        transition: opacity 0.2s ease-out;
+    }
+
+    .wpcc-banner:not(.wpcc-banner--modal) {
+        transform: none;
+    }
+
+    .wpcc-banner--modal {
+        transform: translate(-50%, -50%);
+    }
+
+    .wpcc-dialog.wpcc-animated,
+    .wpcc-dialog.wpcc-animated.is-closing {
+        transform: none;
+    }
+
+    .wpcc-switch,
+    .wpcc-switch::before,
+    .wpcc-dialog__close,
+    .wpcc-floating,
+    .wpcc-button {
+        transition: none;
+    }
+}
+
+@media print {
+    .wpcc-root {
+        display: none !important;
+    }
+}

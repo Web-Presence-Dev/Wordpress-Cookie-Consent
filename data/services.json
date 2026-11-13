@@ -1,0 +1,345 @@
+[
+    {
+        "id": "google-analytics",
+        "name": "Google Analytics (GA4)",
+        "category": "analytics",
+        "consent_mode": true,
+        "src": [
+            "googletagmanager.com/gtag/js",
+            "google-analytics.com",
+            "analytics.google.com",
+            "/gtag/js?id=G-",
+            "googletagmanager.com/gtag/destination"
+        ],
+        "inline": [
+            "gtag('config'",
+            "gtag(\"config\"",
+            "gtag('js'",
+            "gtag(\"js\"",
+            "GoogleAnalyticsObject",
+            "_gaq.push"
+        ],
+        "cookies": [
+            "_ga",
+            "_ga_*",
+            "_gid",
+            "_gat*",
+            "__utm*"
+        ]
+    },
+    {
+        "id": "google-tag-manager",
+        "name": "Google Tag Manager",
+        "category": "analytics",
+        "consent_mode": true,
+        "src": [
+            "googletagmanager.com/gtm.js",
+            "googletagmanager.com/ns.html"
+        ],
+        "inline": [
+            "googletagmanager.com/gtm.js",
+            "'gtm.start'",
+            "\"gtm.start\""
+        ],
+        "cookies": []
+    },
+    {
+        "id": "google-ads",
+        "name": "Google Ads & DoubleClick",
+        "category": "marketing",
+        "consent_mode": true,
+        "src": [
+            "googleadservices.com",
+            "googlesyndication.com",
+            "doubleclick.net",
+            "/gtag/js?id=AW-",
+            "/gtag/js?id=DC-",
+            "google.com/pagead",
+            "adservice.google."
+        ],
+        "inline": [
+            "gtag('config', 'AW-",
+            "gtag(\"config\", \"AW-",
+            "adsbygoogle"
+        ],
+        "cookies": [
+            "_gcl_*",
+            "IDE",
+            "test_cookie",
+            "__gads",
+            "__gpi"
+        ]
+    },
+    {
+        "id": "meta-pixel",
+        "name": "Meta (Facebook) Pixel",
+        "category": "marketing",
+        "src": [
+            "connect.facebook.net",
+            "facebook.com/tr"
+        ],
+        "inline": [
+            "fbq(",
+            "connect.facebook.net"
+        ],
+        "cookies": [
+            "_fbp",
+            "_fbc",
+            "fr"
+        ]
+    },
+    {
+        "id": "linkedin-insight",
+        "name": "LinkedIn Insight Tag",
+        "category": "marketing",
+        "src": [
+            "snap.licdn.com",
+            "px.ads.linkedin.com",
+            "dc.ads.linkedin.com"
+        ],
+        "inline": [
+            "_linkedin_partner_id",
+            "_linkedin_data_partner_ids",
+            "lintrk("
+        ],
+        "cookies": [
+            "li_fat_id",
+            "li_sugr",
+            "bcookie",
+            "lidc",
+            "UserMatchHistory",
+            "AnalyticsSyncHistory",
+            "li_gc"
+        ]
+    },
+    {
+        "id": "tiktok-pixel",
+        "name": "TikTok Pixel",
+        "category": "marketing",
+        "src": [
+            "analytics.tiktok.com"
+        ],
+        "inline": [
+            "ttq.load",
+            "TiktokAnalyticsObject"
+        ],
+        "cookies": [
+            "_ttp",
+            "_tt_enable_cookie",
+            "ttcsid*"
+        ]
+    },
+    {
+        "id": "microsoft-clarity",
+        "name": "Microsoft Clarity",
+        "category": "analytics",
+        "src": [
+            "clarity.ms"
+        ],
+        "inline": [
+            "clarity.ms/tag",
+            "\"clarity\"",
+            "'clarity'"
+        ],
+        "cookies": [
+            "_clck",
+            "_clsk",
+            "CLID",
+            "MUID"
+        ]
+    },
+    {
+        "id": "microsoft-ads",
+        "name": "Microsoft Advertising (Bing UET)",
+        "category": "marketing",
+        "src": [
+            "bat.bing.com"
+        ],
+        "inline": [
+            "bat.bing.com",
+            "uetq"
+        ],
+        "cookies": [
+            "_uetsid",
+            "_uetvid",
+            "MUID"
+        ]
+    },
+    {
+        "id": "hotjar",
+        "name": "Hotjar",
+        "category": "analytics",
+        "src": [
+            "static.hotjar.com",
+            "script.hotjar.com",
+            "hotjar.com/c/hotjar-"
+        ],
+        "inline": [
+            "static.hotjar.com",
+            "_hjSettings"
+        ],
+        "cookies": [
+            "_hj*"
+        ]
+    },
+    {
+        "id": "pinterest-tag",
+        "name": "Pinterest Tag",
+        "category": "marketing",
+        "src": [
+            "s.pinimg.com/ct/",
+            "ct.pinterest.com"
+        ],
+        "inline": [
+            "pintrk("
+        ],
+        "cookies": [
+            "_pin_unauth",
+            "_pinterest_ct_ua",
+            "_epik"
+        ]
+    },
+    {
+        "id": "x-pixel",
+        "name": "X (Twitter) Pixel",
+        "category": "marketing",
+        "src": [
+            "static.ads-twitter.com",
+            "analytics.twitter.com",
+            "t.co/i/adsct",
+            "platform.twitter.com/oct.js"
+        ],
+        "inline": [
+            "twq(",
+            "static.ads-twitter.com"
+        ],
+        "cookies": [
+            "muc_ads",
+            "personalization_id",
+            "guest_id*"
+        ]
+    },
+    {
+        "id": "snap-pixel",
+        "name": "Snap Pixel",
+        "category": "marketing",
+        "src": [
+            "sc-static.net/scevent",
+            "tr.snapchat.com"
+        ],
+        "inline": [
+            "snaptr("
+        ],
+        "cookies": [
+            "_scid",
+            "_scid_r",
+            "_sctr"
+        ]
+    },
+    {
+        "id": "hubspot",
+        "name": "HubSpot tracking",
+        "category": "marketing",
+        "src": [
+            "js.hs-scripts.com",
+            "js.hs-analytics.net",
+            "js.hsadspixel.net",
+            "js.hs-banner.com",
+            "js.usemessages.com"
+        ],
+        "inline": [
+            "js.hs-scripts.com",
+            "_hsq.push"
+        ],
+        "cookies": [
+            "__hstc",
+            "__hssc",
+            "__hssrc",
+            "hubspotutk",
+            "messagesUtk"
+        ]
+    },
+    {
+        "id": "matomo-cloud",
+        "name": "Matomo (cloud)",
+        "category": "analytics",
+        "src": [
+            "cdn.matomo.cloud",
+            ".matomo.cloud/matomo.js"
+        ],
+        "inline": [
+            "_paq.push",
+            "matomo.cloud"
+        ],
+        "cookies": [
+            "_pk_id*",
+            "_pk_ses*",
+            "_pk_ref*"
+        ]
+    },
+    {
+        "id": "youtube",
+        "name": "YouTube",
+        "category": "marketing",
+        "src": [
+            "youtube.com/embed",
+            "youtube.com/iframe_api",
+            "youtube.com/s/player",
+            "youtu.be/"
+        ],
+        "inline": [],
+        "cookies": [
+            "YSC",
+            "VISITOR_INFO1_LIVE",
+            "VISITOR_PRIVACY_METADATA"
+        ]
+    },
+    {
+        "id": "vimeo",
+        "name": "Vimeo",
+        "category": "functional",
+        "src": [
+            "player.vimeo.com"
+        ],
+        "inline": [],
+        "cookies": [
+            "vuid",
+            "__cf_bm"
+        ]
+    },
+    {
+        "id": "google-maps",
+        "name": "Google Maps",
+        "category": "functional",
+        "src": [
+            "google.com/maps/embed",
+            "maps.google.com/maps",
+            "maps.googleapis.com/maps/api/js"
+        ],
+        "inline": [],
+        "cookies": []
+    },
+    {
+        "id": "google-fonts",
+        "name": "Google Fonts",
+        "category": "functional",
+        "essential": true,
+        "src": [
+            "fonts.googleapis.com",
+            "fonts.gstatic.com"
+        ],
+        "inline": [],
+        "cookies": []
+    },
+    {
+        "id": "gravatar",
+        "name": "Gravatar",
+        "category": "functional",
+        "essential": true,
+        "src": [
+            "gravatar.com"
+        ],
+        "inline": [],
+        "cookies": []
+    }
+]
