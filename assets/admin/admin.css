@@ -137,7 +137,8 @@ body.toplevel_page_wpcc #wpfooter {
     min-height: 36px;
     padding: 0 14px;
     border: 1px solid rgba(255, 251, 239, 0.45);
-    border-radius: 6px;
+    /* Pill, like Save changes beside it */
+    border-radius: 999px;
     background: transparent;
     box-shadow: none;
     color: var(--wpcc-cream);
@@ -664,7 +665,9 @@ body.toplevel_page_wpcc #wpfooter {
     box-sizing: border-box;
     /* Short enough to fit above the page footer too, so it isn't pushed up
        at the bottom of the page */
-    max-height: calc(100vh - var(--wpcc-pin, 198px) - var(--wpcc-pin-space, 120px));
+    /* A fixed height: the preview frame inside fills it (frames have no height of their own) */
+    height: calc(100vh - var(--wpcc-pin, 198px) - var(--wpcc-pin-space, 120px));
+    min-height: 360px;
     padding: 20px;
     border: 1px solid var(--wpcc-line);
     border-radius: 12px;
@@ -689,24 +692,16 @@ body.toplevel_page_wpcc #wpfooter {
     color: #fff;
 }
 
-.wpcc-preview {
-    display: grid;
-    gap: 16px;
+/* The preview is a front-end page (src/Frontend/Preview.php) in a frame,
+   so it's styled by the theme; see assets/css/preview.css */
+.wpcc-preview-frame {
+    display: block;
     flex: 1 1 auto;
+    width: 100%;
     min-height: 0;
-    padding: 16px;
+    border: 1px solid var(--wpcc-line);
     border-radius: 8px;
-    background:
-        repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0 10px, transparent 10px 20px),
-        #f6f7f7;
-    overflow: auto;
-}
-
-/* Dark: the preview's backdrop becomes a dark page */
-.wpcc-preview[data-mode='dark'] {
-    background:
-        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 10px, transparent 10px 20px),
-        #1d2327;
+    background: #fff;
 }
 
 .wpcc-preview__hint {
@@ -719,118 +714,6 @@ body.toplevel_page_wpcc #wpfooter {
 
 .wpcc-preview__hint[hidden] {
     display: none;
-}
-
-.wpcc-preview .wpcc-root {
-    display: grid;
-    gap: 16px;
-}
-
-.wpcc-preview .wpcc-banner,
-.wpcc-preview .wpcc-banner--modal,
-.wpcc-preview .wpcc-banner--bar {
-    position: relative;
-    inset: auto;
-    width: auto;
-    max-width: none;
-    max-height: none;
-    opacity: 1;
-    transform: none;
-    transition: none;
-}
-
-.wpcc-preview .wpcc-banner--bar {
-    grid-template-columns: 1fr;
-    padding: 20px;
-    border-radius: 0;
-}
-
-.wpcc-preview .wpcc-overlay {
-    display: none;
-}
-
-/* Floating button shown in place, under the dialog */
-.wpcc-preview .wpcc-floating {
-    position: relative;
-    inset: auto;
-    margin: 0;
-}
-
-.wpcc-preview__label {
-    margin: 0 0 -8px;
-    color: #50575e;
-    font-size: 12px;
-}
-
-.wpcc-preview[data-mode='dark'] .wpcc-preview__label {
-    color: #c3c4c7;
-}
-
-.wpcc-preview .wpcc-dialog {
-    position: relative;
-    inset: auto;
-    display: block;
-    width: auto;
-    margin: 0;
-    opacity: 1;
-    transform: none;
-}
-
-/* Nothing in the preview scrolls on its own, so the wheel always scrolls the
-   preview (the front end's overscroll-behavior: contain would trap it) */
-.wpcc-preview .wpcc-dialog__inner,
-.wpcc-preview .wpcc-banner {
-    max-height: none;
-    overflow: visible;
-    overscroll-behavior: auto;
-}
-
-.wpcc-preview .wpcc-switch {
-    cursor: pointer;
-}
-
-/* WordPress admin styles every checkbox; put the front-end switch back */
-.wpcc-preview input.wpcc-switch[type='checkbox'] {
-    width: 44px;
-    min-width: 44px;
-    height: 24px;
-    margin: 0;
-    border: 2px solid var(--wpcc-ink, #1d2327);
-    border-radius: 24px;
-    background: transparent;
-    box-shadow: none;
-}
-
-.wpcc-preview input.wpcc-switch[type='checkbox']::before,
-.wpcc-preview input.wpcc-switch[type='checkbox']:checked::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    border-radius: 50%;
-    background: var(--wpcc-ink, #1d2327);
-}
-
-.wpcc-preview input.wpcc-switch[type='checkbox']:checked {
-    border-color: var(--wpcc-switch-on, #1d2327);
-    background: var(--wpcc-switch-on, #1d2327);
-}
-
-.wpcc-preview input.wpcc-switch[type='checkbox']:checked::before {
-    background: var(--wpcc-surface, #fff);
-    transform: translateX(20px);
-}
-
-.wpcc-preview .wpcc-dialog__close {
-    pointer-events: none;
-}
-
-.wpcc-preview .wpcc-dialog__title {
-    border: 0;
-    padding: 0;
 }
 
 /* Position picker */
@@ -995,32 +878,6 @@ body.toplevel_page_wpcc #wpfooter {
     .wpcc-color-group {
         grid-template-columns: 1fr;
     }
-}
-
-/* Theme buttons in the preview: the theme's CSS isn't loaded here, so show
-   a plain stand-in rather than browser-default buttons */
-.wpcc-preview .wpcc-btn {
-    min-height: 40px;
-    padding: 8px 16px;
-    border: 1px dashed currentColor;
-    border-radius: 6px;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-}
-
-.wpcc-preview .wpcc-btn svg {
-    width: 1em;
-    height: 1em;
-    vertical-align: middle;
-}
-
-/* The part being edited, outlined in the preview */
-.wpcc-preview .is-wpcc-highlight {
-    outline: 3px dashed var(--wpcc-orange);
-    outline-offset: 4px;
-    transition: outline-color 0.15s ease;
 }
 
 /* The open picker floats over the page instead of pushing it down */

@@ -108,7 +108,7 @@ Everything here is applied as CSS custom properties, so there's no theme CSS to 
 - **Colours**: background, text, links, main buttons, outline buttons, the switch's "on" colour and the dialog backdrop. Optionally set a second **dark mode** palette, used when the visitor's device is in dark mode.
 - **Wording**: every piece of text on the banner, dialog and blocked-embed placeholders.
 
-A live preview on the right updates as you change things. Use its Light/Dark buttons to check both palettes.
+A live preview on the right updates as you change things, before you save. It's rendered by the site's theme, so fonts and theme buttons look exactly as they will on the site. Use its Light/Dark buttons to check both palettes.
 
 ### Categories & services
 
@@ -178,7 +178,7 @@ Most sites only need **Appearance** in the settings. When the banner has to matc
 
 The plugin then drops its own button styles: the Buttons colours and the button-corner setting are hidden and ignored. Main buttons are Accept all, Reject all, Save choices, "Allow and load" and the `[cookie_settings]` button; outline buttons are Accept all and Reject all in the preferences pop-up.
 
-The settings preview can't load your theme's CSS, so it shows plain stand-in buttons. Check the real look on the site.
+The settings preview is rendered by your theme (it's a small front-end page shown in a frame), so it shows the buttons, fonts and colours exactly as visitors will see them.
 
 ### 2. Replace the button markup (PHP filter)
 

@@ -1,8 +1,10 @@
 /**
  * Web Presence Cookie Consent: settings page behaviour.
  *
- * - Appearance: colour pickers and a live preview of the banner and dialog
- *   (custom properties on .wpcc-preview, text copied into the markup).
+ * - Appearance: colour pickers and a live preview of the banner and dialog.
+ *   The preview is a front-end page in a frame (src/Frontend/Preview.php), so
+ *   it's styled by the theme; it's on the same origin, so this sets custom
+ *   properties and text on its .wpcc-preview directly.
  * - Categories: add and remove custom rule rows.
  */
 (function ($) {
@@ -12,7 +14,9 @@
 
     /* Appearance --------------------------------------------------------- */
 
-    var preview = document.querySelector('.wpcc-preview');
+    var frame = document.querySelector('.wpcc-preview-frame');
+    // .wpcc-preview inside the frame, once it has loaded
+    var preview = null;
     var mode = 'light';
 
     // True while undo puts fields back; picker callbacks must not write then
@@ -60,11 +64,16 @@
     }
 
     function applyFont() {
+        var font = value('font');
+        var customField = field('font_custom');
+        if (customField) {
+            customField.closest('.wpcc-field').hidden = font !== 'custom';
+        }
+
         if (!preview) {
             return;
         }
 
-        var font = value('font');
         var custom = value('font_custom').trim();
         var family = font === 'system' ? SYSTEM_FONT : (font === 'custom' && custom ? custom + ',system-ui,sans-serif' : 'inherit');
 
@@ -72,11 +81,6 @@
         preview.style.setProperty('--wpcc-font-size', (parseInt(value('font_size'), 10) || 15) + 'px');
         preview.style.setProperty('--wpcc-radius', (parseInt(value('radius'), 10) || 0) + 'px');
         preview.style.setProperty('--wpcc-button-radius', (parseInt(value('button_radius'), 10) || 0) + 'px');
-
-        var customField = field('font_custom');
-        if (customField) {
-            customField.closest('.wpcc-field').hidden = font !== 'custom';
-        }
     }
 
     function applyPosition() {
@@ -101,12 +105,14 @@
     };
 
     function setAll(selector, text) {
-        preview.querySelectorAll(selector).forEach(function (el) { setLabel(el, text); });
+        if (preview) {
+            preview.querySelectorAll(selector).forEach(function (el) { setLabel(el, text); });
+        }
     }
 
     // Change a button's label but keep any icon or wrapper (theme button markup)
     function setLabel(el, text) {
-        var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+        var walker = el.ownerDocument.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
             acceptNode: function (node) {
                 return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
             }
@@ -121,19 +127,64 @@
 
     // Keep the policy link that follows the text
     function setText(selector, text, keepLink) {
-        var el = preview.querySelector(selector);
+        var el = preview && preview.querySelector(selector);
         if (!el) {
             return;
         }
         var link = keepLink ? el.querySelector('a') : null;
         el.textContent = text;
         if (link) {
-            el.appendChild(document.createTextNode(' '));
+            el.appendChild(el.ownerDocument.createTextNode(' '));
             el.appendChild(link);
         }
     }
 
-    if (preview) {
+    // Everything the form says, applied to the preview (also after it reloads)
+    function syncPreview() {
+        if (!preview) {
+            return;
+        }
+        preview.setAttribute('data-mode', mode);
+        applyColours();
+        applyFont();
+        applyPosition();
+        document.querySelectorAll('[data-wpcc-preview^="text."]').forEach(function (el) {
+            var key = el.getAttribute('data-wpcc-preview');
+            if (textTargets[key]) {
+                textTargets[key](el.value);
+            }
+        });
+        var floating = field('floating_button');
+        preview.querySelectorAll('.wpcc-floating, .wpcc-preview__label').forEach(function (el) {
+            el.hidden = !(floating && floating.checked);
+        });
+    }
+
+    function connectPreview() {
+        var doc = frame.contentDocument;
+        var found = doc && doc.querySelector('.wpcc-preview');
+        if (!found || found === preview) {
+            return;
+        }
+        preview = found;
+
+        // The preview's buttons and links are for show; its switches can be toggled
+        preview.addEventListener('click', function (event) {
+            if (event.target.closest('button, a')) {
+                event.preventDefault();
+            }
+        });
+
+        syncPreview();
+    }
+
+    if (frame) {
+        frame.addEventListener('load', connectPreview);
+        // Already loaded before this script ran
+        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+            connectPreview();
+        }
+
         // The picker's drag handles are <a href="#">; a stray click on one
         // would jump the page to the top
         document.addEventListener('click', function (event) {
@@ -200,7 +251,7 @@
                 });
             }
 
-            if (target === field('floating_button')) {
+            if (target === field('floating_button') && preview) {
                 preview.querySelectorAll('.wpcc-floating, .wpcc-preview__label').forEach(function (el) {
                     el.hidden = !target.checked;
                 });
@@ -229,7 +280,9 @@
                     b.classList.toggle('is-active', on);
                     b.setAttribute('aria-pressed', on ? 'true' : 'false');
                 });
-                preview.setAttribute('data-mode', mode);
+                if (preview) {
+                    preview.setAttribute('data-mode', mode);
+                }
                 applyColours();
             });
         });
@@ -243,17 +296,21 @@
         };
         var highlight = function (group) {
             clearHighlight();
+            if (!preview) {
+                return;
+            }
             var targets = Array.from(preview.querySelectorAll(group.getAttribute('data-wpcc-target')))
                 .filter(function (el) { return !el.hidden; });
             targets.forEach(function (el) { el.classList.add('is-wpcc-highlight'); });
             highlighted = targets;
 
+            // Scroll the preview frame (not the page) to it if it's out of view
             var first = targets[0];
-            if (first) {
-                var box = preview.getBoundingClientRect();
+            var win = frame.contentWindow;
+            if (first && win) {
                 var rect = first.getBoundingClientRect();
-                if (rect.top < box.top || rect.top > box.bottom - 40) {
-                    preview.scrollTo({ top: preview.scrollTop + rect.top - box.top - 16, behavior: 'smooth' });
+                if (rect.top < 0 || rect.top > win.innerHeight - 40) {
+                    win.scrollTo({ top: win.scrollY + rect.top - 16, behavior: 'smooth' });
                 }
             }
         };
@@ -284,16 +341,7 @@
             color.classList.toggle('is-flipped', color.getBoundingClientRect().left + 257 > card.getBoundingClientRect().right - 8);
         }, true);
 
-        // The preview's buttons and links are for show; its switches can be toggled
-        preview.addEventListener('click', function (event) {
-            if (event.target.closest('button, a')) {
-                event.preventDefault();
-            }
-        });
-
-        applyColours();
         applyFont();
-        applyPosition();
     }
 
     /* Cookie policy page search ------------------------------------------ */

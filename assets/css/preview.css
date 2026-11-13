@@ -1,0 +1,114 @@
+/*
+ * Web Presence Cookie Consent: the settings preview page.
+ *
+ * src/Frontend/Preview.php renders the banner, preferences pop-up and
+ * floating button as a front-end page with the theme's styles, shown in a
+ * frame on the Appearance tab. This lays them out side by side, static
+ * instead of fixed, and adds the outline used to show which part a colour
+ * group changes.
+ */
+
+html,
+body.wpcc-preview-body {
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body.wpcc-preview-body {
+    cursor: auto;
+}
+
+.wpcc-preview {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+}
+
+/* Dark: the backdrop becomes a dark page */
+body.wpcc-preview-body:has(.wpcc-preview[data-mode='dark']) {
+    background: #1d2327;
+}
+
+.wpcc-preview .wpcc-root {
+    display: grid;
+    gap: 16px;
+}
+
+.wpcc-preview .wpcc-banner,
+.wpcc-preview .wpcc-banner--modal,
+.wpcc-preview .wpcc-banner--bar {
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+.wpcc-preview .wpcc-banner--bar {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    border-radius: 0;
+}
+
+.wpcc-preview .wpcc-overlay {
+    display: none;
+}
+
+.wpcc-preview .wpcc-dialog {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: auto;
+    margin: 0;
+    opacity: 1;
+    transform: none;
+}
+
+/* Nothing scrolls on its own; the frame scrolls as a whole */
+.wpcc-preview .wpcc-dialog__inner,
+.wpcc-preview .wpcc-banner {
+    max-height: none;
+    overflow: visible;
+    overscroll-behavior: auto;
+}
+
+.wpcc-preview .wpcc-dialog__close {
+    pointer-events: none;
+}
+
+.wpcc-preview .wpcc-switch {
+    cursor: pointer;
+}
+
+/* Floating button shown in place, under the pop-up */
+.wpcc-preview .wpcc-floating {
+    position: relative;
+    inset: auto;
+    margin: 0;
+}
+
+.wpcc-preview__label {
+    margin: 0 0 -8px;
+    color: #50575e;
+    font-size: 12px;
+}
+
+.wpcc-preview[data-mode='dark'] .wpcc-preview__label {
+    color: #c3c4c7;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* The part being edited (hover a colour group in the settings) */
+.wpcc-preview .is-wpcc-highlight {
+    outline: 3px dashed #e04f1f;
+    outline-offset: 4px;
+}

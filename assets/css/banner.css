@@ -218,6 +218,11 @@
     }
 }
 
+/* "Manage preferences": a quieter, smaller link beside the buttons */
+.wpcc-banner .wpcc-link {
+    font-size: 0.8em;
+}
+
 .wpcc-banner__text {
     margin: 0;
 }

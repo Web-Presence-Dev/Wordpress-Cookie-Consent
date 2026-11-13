@@ -2,8 +2,6 @@
 
 namespace WebPresence\CookieConsent\Admin;
 
-use WebPresence\CookieConsent\Frontend\Banner;
-use WebPresence\CookieConsent\Frontend\HeadScript;
 use WebPresence\CookieConsent\Services\Registry;
 use WebPresence\CookieConsent\Plugin;
 use WebPresence\CookieConsent\Settings;
@@ -81,7 +79,6 @@ class SettingsPage
 
         if ('appearance' === $tab) {
             wp_enqueue_style('wp-color-picker');
-            wp_enqueue_style('wpcc-banner', WPCC_URL . 'assets/css/banner.css', [], Plugin::asset_version('assets/css/banner.css'));
         }
 
         // Every tab: pinned header, page search, unsaved-changes guard, preview
@@ -479,8 +476,11 @@ class SettingsPage
                     ?>
                 </div>
                 <div class="notice notice-info inline wpcc-theme-buttons-note" data-wpcc-show-if="theme_buttons"<?php echo $s['theme_buttons'] ? '' : ' hidden'; ?>>
-                    <p><?php esc_html_e('The preview can\'t load your theme\'s styles, so check the buttons on the site itself.', 'wpcc'); ?>
-                    <?php echo wp_kses_post(__('If your theme\'s buttons need extra markup, such as an icon, a developer can use the <code>wpcc_button_html</code> filter; see the plugin README.', 'wpcc')); ?></p>
+                    <?php if (has_filter('wpcc_button_html')) : ?>
+                        <p><?php echo wp_kses_post(__('Your theme supplies the button markup (it uses the <code>wpcc_button_html</code> filter), so the buttons match the rest of the site.', 'wpcc')); ?></p>
+                    <?php else : ?>
+                        <p><?php echo wp_kses_post(__('If your theme\'s buttons need extra markup, such as an icon, a developer can add it with the <code>wpcc_button_html</code> filter; see the plugin README.', 'wpcc')); ?></p>
+                    <?php endif; ?>
                 </div>
                 <div class="wpcc-grid" data-wpcc-hide-if="theme_buttons"<?php echo $s['theme_buttons'] ? ' hidden' : ''; ?>>
                     <?php $this->text(self::name('button_radius'), (string) $s['button_radius'], __('Button corners (px)', 'wpcc'), __('0 is square, 50 is fully rounded.', 'wpcc'), 'number', ['min' => 0, 'max' => 50, 'class' => 'small-text', 'data-wpcc-preview' => 'button_radius']); ?>
@@ -535,44 +535,13 @@ class SettingsPage
                         <?php esc_html_e('Dark mode colours are off, so visitors in dark mode see the light colours.', 'wpcc'); ?>
                         <button type="button" class="button-link wpcc-preview__enable-dark"><?php esc_html_e('Turn them on', 'wpcc'); ?></button>
                     </p>
-                    <style id="wpcc-preview-vars"><?php echo str_replace(':root', '.wpcc-preview', HeadScript::css_vars(array_merge($s, ['dark_enabled' => false]))); // phpcs:ignore -- sanitised values ?></style>
-                    <div class="wpcc-preview" data-mode="light">
-                        <?php echo $this->preview_markup($s); // phpcs:ignore -- escaped in Banner::markup ?>
-                    </div>
+                    <?php /* A front-end page with the theme's styles (src/Frontend/Preview.php); admin.js updates it live */ ?>
+                    <iframe class="wpcc-preview-frame" src="<?php echo esc_url(\WebPresence\CookieConsent\Frontend\Preview::url()); ?>" title="<?php esc_attr_e('Preview of the cookie banner', 'wpcc'); ?>"></iframe>
                 </div>
             </aside>
         </div>
         <?php
         $this->form_close();
-    }
-
-    private function preview_markup(array $s): string
-    {
-        // Always render the floating button; admin.js shows it when its setting is on
-        $html = Banner::markup(array_merge($s, ['floating_button' => true]), true);
-
-        // Show one switch on, so the "on" colours can be seen
-        $html = preg_replace('/<input class="wpcc-switch"/', '<input class="wpcc-switch" checked', $html, 1);
-
-        $html = str_replace(
-            '<button type="button" class="wpcc-floating wpcc-open"',
-            '<p class="wpcc-preview__label"' . ($s['floating_button'] ? '' : ' hidden') . '>' . esc_html__('Floating button, shown after a choice:', 'wpcc') . '</p>'
-            . '<button type="button" class="wpcc-floating wpcc-open"' . ($s['floating_button'] ? '' : ' hidden'),
-            $html
-        );
-
-        // A static, non-modal dialog in the preview
-        $html = str_replace('<dialog class="wpcc-dialog"', '<dialog open class="wpcc-dialog"', $html);
-        // closedby="any" would light-dismiss the preview on any click on the page
-        $html = str_replace(' closedby="any"', '', $html);
-        // It sits inside the settings <form>, where a nested <form> is dropped
-        $html = str_replace(['<form class="wpcc-dialog__inner" method="dialog">', '</form>'], ['<div class="wpcc-dialog__inner">', '</div>'], $html);
-        // Preview switches aren't settings
-        $html = preg_replace('/(<input class="wpcc-switch"[^>]*?) name="[^"]*"/', '$1', $html);
-
-        $html = str_replace(['id="wpcc-dialog"', 'id="wpcc-root"', 'id="wpcc-placeholder"', 'id="wpcc-i18n"'], ['id="wpcc-preview-dialog"', '', '', ''], $html);
-
-        return $html;
     }
 
     /**

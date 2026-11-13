@@ -7,6 +7,7 @@ use WebPresence\CookieConsent\Admin\SettingsPage;
 use WebPresence\CookieConsent\Frontend\Banner;
 use WebPresence\CookieConsent\Frontend\Blocker;
 use WebPresence\CookieConsent\Frontend\HeadScript;
+use WebPresence\CookieConsent\Frontend\Preview;
 use WebPresence\CookieConsent\Integrations\WpConsentApi;
 use WebPresence\CookieConsent\Updater\GitHubUpdater;
 
@@ -35,6 +36,7 @@ final class Plugin
         // The webpresence theme ships its own GA4 banner; this plugin replaces it
         add_filter('webpresence_consent_enabled', '__return_false', 99);
 
+        new Preview();
         new HeadScript();
         new Blocker();
         new Banner();
@@ -77,7 +79,8 @@ final class Plugin
             return false;
         }
 
-        if (Scanner::is_scan_request()) {
+        // The scanner's page loads and the settings preview page run without it
+        if (Scanner::is_scan_request() || Preview::is_request()) {
             return false;
         }
 
