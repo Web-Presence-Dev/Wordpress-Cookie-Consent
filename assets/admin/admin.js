@@ -161,7 +161,20 @@
     }
 
     function connectPreview() {
-        var doc = frame.contentDocument;
+        var doc = null;
+        try {
+            doc = frame.contentDocument;
+        } catch (e) {
+            doc = null;
+        }
+
+        // Front end on another address: the browser keeps the frame off limits,
+        // so it can only show saved settings
+        var cross = document.querySelector('.wpcc-preview__cross');
+        if (cross) {
+            cross.hidden = Boolean(doc);
+        }
+
         var found = doc && doc.querySelector('.wpcc-preview');
         if (!found || found === preview) {
             return;
@@ -181,8 +194,12 @@
     if (frame) {
         frame.addEventListener('load', connectPreview);
         // Already loaded before this script ran
-        if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
-            connectPreview();
+        try {
+            if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+                connectPreview();
+            }
+        } catch (e) {
+            // Different origin; the load event reports it
         }
 
         // The picker's drag handles are <a href="#">; a stray click on one

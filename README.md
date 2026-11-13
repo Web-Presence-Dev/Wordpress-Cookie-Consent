@@ -83,7 +83,7 @@ Use this for sites where `DISALLOW_FILE_MODS` is on (Tesla sets it on production
 
 ## Settings
 
-The **Cookie Consent** menu has five tabs.
+The **Cookie Consent** menu has six tabs.
 
 ### General
 
@@ -119,6 +119,14 @@ A live preview on the right updates as you change things, before you save. It's 
 ### Scanner
 
 See [The scanner](#the-scanner).
+
+### Tools
+
+**Copy settings to another site.** **Export settings** downloads a `.json` file of every setting: appearance, colours, wording, categories, services and custom rules. **Import settings** applies that file on another site, so it's set up the same way.
+
+- Every value goes through the same checks as the settings forms.
+- The cookie policy page is matched by its address (e.g. `/cookies/`). If there's no such page, you're told to choose one on the General tab.
+- The site's consent version is kept, so visitors aren't asked again.
 
 ### Updates
 

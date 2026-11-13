@@ -16,12 +16,18 @@ defined('ABSPATH') || exit;
  * side (assets/css/preview.css). The admin page updates it live through the
  * frame (same origin), so unsaved changes show straight away.
  *
- * Only for logged-in admins, with a nonce: /?wpcc_preview=<nonce>. The
- * plugin's own scripts don't run here, so nothing is saved or unblocked.
+ * Opened with a one-off key from the settings page: /?wpcc_preview=<key>.
+ * The key is checked instead of the login, because some sites don't see the
+ * admin's login on the front end (admin and front end on different
+ * addresses, or a cache or proxy that drops the login cookie). The page only
+ * shows the banner with the site's own settings, and the plugin's own scripts
+ * don't run here, so nothing is saved or unblocked.
  */
 class Preview
 {
     public const QUERY = 'wpcc_preview';
+
+    private const KEY_TTL = 2 * HOUR_IN_SECONDS;
 
     public function __construct()
     {
@@ -39,17 +45,27 @@ class Preview
         return isset($_GET[self::QUERY]) && !is_admin(); // phpcs:ignore WordPress.Security.NonceVerification
     }
 
+    /**
+     * A preview address with a fresh key, for the settings page (admins only).
+     */
     public static function url(): string
     {
-        return add_query_arg(self::QUERY, wp_create_nonce('wpcc_preview'), home_url('/'));
+        $key = strtolower(wp_generate_password(32, false, false));
+        set_transient('wpcc_preview_' . $key, get_current_user_id(), self::KEY_TTL);
+
+        return add_query_arg(self::QUERY, $key, home_url('/'));
     }
 
     public function render(): void
     {
-        $nonce = sanitize_key(wp_unslash($_GET[self::QUERY] ?? '')); // phpcs:ignore WordPress.Security.NonceVerification
+        $key = sanitize_key(wp_unslash($_GET[self::QUERY] ?? '')); // phpcs:ignore WordPress.Security.NonceVerification
 
-        if (!current_user_can('manage_options') || !wp_verify_nonce($nonce, 'wpcc_preview')) {
-            wp_die(esc_html__('This preview is only available from the Cookie Consent settings.', 'wpcc'), '', ['response' => 403]);
+        if (32 !== strlen($key) || false === get_transient('wpcc_preview_' . $key)) {
+            wp_die(
+                esc_html__('This preview has expired. Reload the Cookie Consent settings page to see it again.', 'wpcc'),
+                esc_html__('Preview expired', 'wpcc'),
+                ['response' => 403]
+            );
         }
 
         nocache_headers();
